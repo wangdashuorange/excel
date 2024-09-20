@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Data Query</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        input { width: 100%; padding: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Excel Data Query</h1>
+        <input type="text" id="searchInput" placeholder="Enter your search query...">
+        <table id="resultTable">
+            <thead>
+                <tr id="headerRow">
+                    <!-- Table headers will be dynamically inserted here -->
+                </tr>
+            </thead>
+            <tbody id="resultBody">
+                <!-- Results will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script>
+        let allData = [];
+
+        // Load CSV data
+        Papa.parse('data.csv', {
+            download: true,
+            header: true,
+            complete: function(results) {
+                allData = results.data;
+                setupTable(results.meta.fields);
+                document.getElementById('searchInput').addEventListener('input', performSearch);
+            }
+        });
+
+        function setupTable(headers) {
+            const headerRow = document.getElementById('headerRow');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+        }
+
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = allData.filter(row => 
+                Object.values(row).some(value => 
+                    value.toLowerCase().includes(searchTerm)
+                )
+            );
+            displayResults(filteredData);
+        }
+
+        function displayResults(data) {
+            const tbody = document.getElementById('resultBody');
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                Object.values(row).forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
